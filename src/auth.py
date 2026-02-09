@@ -29,7 +29,7 @@ async def get_user_by_email(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-async def is_authenticate_user(
+async def is_authenticated_user(
     email: str,
     plain_password: str,
     session: AsyncSession = Depends(get_async_session)
