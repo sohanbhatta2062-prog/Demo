@@ -73,3 +73,4 @@ async def create_table():
 async def get_async_session():
     async with async_session_maker() as session:
         yield session
+print("HELLO")
