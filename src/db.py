@@ -22,7 +22,7 @@ class UserDB(Base):
     u_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     username = Column(String(200), nullable=False, unique=True)
     contact = Column(String(10), nullable=False, unique=True)
-    adddress = Column(Text)
+    address = Column(Text)
     email = Column(String(225), unique=True, nullable=False)
     password = Column(String(225), nullable=False)
     is_super_user = Column(Boolean, default=True)
@@ -63,3 +63,13 @@ class ExpensesDB(Base):
     user = relationship("UserDB", back_populates="expenses")
 
 
+engine = create_async_engine(DATABASE_URL, echo=True)
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+async def create_table():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+async def get_async_session():
+    async with async_session_maker() as session:
+        yield session
