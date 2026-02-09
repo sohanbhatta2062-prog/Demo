@@ -1,4 +1,4 @@
-from sqlalchemy import select, Column, ForeignKey, Integer, Boolean, String, Text, DateTime
+from sqlalchemy import Numeric, select, Column, ForeignKey, Integer, Boolean, String, Text, DateTime
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -28,5 +28,38 @@ class UserDB(Base):
     is_super_user = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    refresh_tokens = relationship("RefreshTokenDB", back_populates="user")
+    expenses = relationship("ExpensesDB", back_populates="user")
+
+class RefreshTokenDB(Base):
+    __tablename__ = "ref_token_table"
+
+    t_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    u_id = Column(UUID(as_uuid=True), ForeignKey("users.u_id"), nullable=False)
+    ref_token = Column(String(225), nullable=False,unique=True)
+    is_revoked = Column(Boolean, default=False) 
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow,onupdate=datetime.utcnow)
+    
+    user = relationship("UserDB", back_populates="refresh_tokens")
+
+class ExpensesDB(Base):
+    __tablename__ = "expenses_table"
+
+    e_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    u_id = Column(UUID(as_uuid=True), ForeignKey("users.u_id"), nullable=False)
+    
+    amount = Column(Numeric(10, 2), nullable=False)
+    category = Column(String(100), nullable=False)
+    title = Column(String(225), nullable=False)
+    description = Column(String(255))
+
+    expense_date = Column(DateTime, nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("UserDB", back_populates="expenses")
 
 
